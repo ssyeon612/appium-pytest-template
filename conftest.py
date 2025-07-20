@@ -1,14 +1,14 @@
 import pytest
-from appium import webdriver
+from utils.driver_factory import create_driver
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--platform", action="store", default="android", help="Platform to test on: android or ios"
+    )
 
 @pytest.fixture(scope="function")
-def driver():
-    desired_caps = {
-        "platformName": "Android",
-        "deviceName": "Android Emulator",
-        "app": "/path/to/your/app.apk",  # 실제 APK 경로로 바꿔야 함
-        "automationName": "UiAutomator2"
-    }
-    driver = webdriver.Remote("http://localhost:4723/wd/hub", desired_caps)
+def driver(request):
+    platform = request.config.getoption("--platform")
+    driver = create_driver(platform)
     yield driver
     driver.quit()
