@@ -1,15 +1,14 @@
-class LoginPage:
-    def __init__(self, driver):
-        self.driver = driver
+import time
 
-    def enter_username(self, username):
-        self.driver.find_element_by_accessibility_id("usernameField").send_keys(username)
+def test_login_success(driver):
+    from pages.login_page import LoginPage
 
-    def enter_password(self, password):
-        self.driver.find_element_by_accessibility_id("passwordField").send_keys(password)
+    login_page = LoginPage(driver)
 
-    def tap_login_button(self):
-        self.driver.find_element_by_accessibility_id("loginButton").click()
+    login_page.enter_username("testuser")
+    login_page.enter_password("testpassword")
+    login_page.tap_login_button()
 
-    def is_logged_in(self):
-        return self.driver.find_element_by_accessibility_id("homeScreen").is_displayed()
+    time.sleep(2) # 필요시 대기
+
+    assert login_page.is_logged_in()

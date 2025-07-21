@@ -1,4 +1,7 @@
+import os
 from appium import webdriver
+from appium.options.android import UiAutomator2Options
+from appium.options.ios import XCUITestOptions
 
 def create_driver(platform="android"):
     if platform.lower() == "android":
