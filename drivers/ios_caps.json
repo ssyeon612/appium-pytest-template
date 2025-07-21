@@ -1,0 +1,14 @@
+{
+  "platformName": "iOS",
+  "platformVersion": "18.0.1",
+  "deviceName": "iPhone 13",
+  "automationName": "XCUITest",
+  "udid": "00008110-001005692182801E",
+  "bundleId": "com.ghsoft.ios.GoddessTicket",
+  "xcodeOrgId": "XK4K7H77N6",
+  "xcodeSigningId": "iPhone Developer",
+  "updatedWDABundleId": "com.ww.WebDriverAgentRunner",
+  "usePrebuiltWDA": false,
+  "showXcodeLog": true,
+  "noReset": false
+}
