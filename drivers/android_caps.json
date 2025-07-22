@@ -4,6 +4,7 @@
   "deviceName": "Android Device",
   "udid": "R3CRA0VDCQL",
   "appPackage": "godticket.mobile",
-  "appActivity": "godticket.mobile.ui.MainActivity",
-  "noReset": false
+  "appActivity": "godticket.mobile.ui.LaunchActivity",
+  "noReset": false,
+  "autoGrantPermissions": true
 }
