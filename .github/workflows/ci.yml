@@ -36,9 +36,8 @@ jobs:
 
     - name: Run Appium & Tests on Real Device
       run: |
-        Start-Process -FilePath "appium" -ArgumentList "--allow-insecure chromedriver_autodownload" -NoNewWindow
+        Start-Process -FilePath "cmd.exe" -ArgumentList "/c npx appium --allow-insecure chromedriver_autodownload" -NoNewWindow
 
-        # Appium 서버 대기
         for ($i = 0; $i -lt 15; $i++) {
           try {
             Test-NetConnection -ComputerName "localhost" -Port 4723 -WarningAction SilentlyContinue | Out-Null
