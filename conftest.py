@@ -9,6 +9,10 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="function")
 def driver(request):
     platform = request.config.getoption("--platform")
-    driver = create_driver(platform)
+    try:
+        driver = create_driver(platform)
+    except Exception as e:
+        print("Driver 생성 실패:", e)
+        raise
     yield driver
     driver.quit()
