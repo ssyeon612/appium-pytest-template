@@ -20,59 +20,78 @@ jobs:
         pip install allure-pytest
         npm install -g appium
 
-        # uiautomator2가 이미 있으면 update만
-        appium driver update uiautomator2 || true
+        # uiautomator2 이미 설치되어 있으면 업데이트만 실행
+        appium driver update uiautomator2 || exit 0
+      shell: pwsh
 
     - name: Check Connected Device
       run: |
-        adb devices
-        COUNT=$(adb devices | grep -w "device" | wc -l)
-        if [ "$COUNT" -eq 0 ]; then
-          echo "❌ 실제 디바이스가 연결되어 있지 않습니다."
+        $devices = & adb devices | Select-String "device$"
+        if ($devices.Count -eq 0) {
+          Write-Host "❌ 실제 디바이스가 연결되어 있지 않습니다."
           exit 1
-        fi
+        }
+        Write-Host "✅ 디바이스 연결 확인됨."
+      shell: pwsh
 
     - name: Run Appium & Tests on Real Device
       run: |
-        nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
+        Start-Process -FilePath "appium" -ArgumentList "--allow-insecure chromedriver_autodownload" -NoNewWindow
 
-        # Wait for Appium to be ready
-        for i in {1..15}
-        do
-          nc -z localhost 4723 && echo "Appium is up!" && break
-          echo "Waiting for Appium..."
-          sleep 2
-        done
+        # Appium 서버 대기
+        for ($i = 0; $i -lt 15; $i++) {
+          try {
+            Test-NetConnection -ComputerName "localhost" -Port 4723 -WarningAction SilentlyContinue | Out-Null
+            if ($?) {
+              Write-Host "Appium is up!"
+              break
+            }
+          } catch {}
+          Write-Host "Waiting for Appium..."
+          Start-Sleep -Seconds 2
+        }
 
         pytest --alluredir=allure-results
+      shell: pwsh
 
     - name: Generate Allure Report
       run: |
         npm install -g allure-commandline --save-dev
         allure generate allure-results -o allure-report --clean
+      shell: pwsh
+
+    - name: Deploy Allure Report to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./allure-report
+        publish_branch: gh-pages
+        force_orphan: true
 
     - name: Notify Slack
       if: always()
-      shell: bash
       run: |
-        REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        $reportUrl = "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        $runUrl = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-        if [ -f "allure-results/summary.json" ]; then
-          TOTAL=$(grep -o '"total": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
-          FAILED=$(grep -o '"failed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
-          PASSED=$(grep -o '"passed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
+        if (Test-Path "allure-results/summary.json") {
+          $json = Get-Content "allure-results/summary.json" | ConvertFrom-Json
+          $total = $json.statistic.total
+          $failed = $json.statistic.failed
+          $passed = $json.statistic.passed
 
-          MESSAGE="📱 *실제 디바이스 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n📊 Allure 리포트: $REPORT_URL\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 GitHub Actions 결과 보기>"
-        else
-          if [ "${{ job.status }}" == "success" ]; then
-            MESSAGE="✅ *실제 디바이스 테스트 성공*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
-          else
-            MESSAGE="❌ *실제 디바이스 테스트 실패*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
-          fi
-        fi
+          $message = "📱 *실제 디바이스 테스트 결과*`n총: $total, 성공: $passed, 실패: $failed`n📊 Allure 리포트: $reportUrl`n<${runUrl}|🔗 GitHub Actions 결과 보기>"
+        }
+        else {
+          if ("${{ job.status }}" -eq "success") {
+            $message = "✅ *실제 디바이스 테스트 성공*`n(Allure 리포트 없음)`n<${runUrl}|🔗 상세 보기>"
+          }
+          else {
+            $message = "❌ *실제 디바이스 테스트 실패*`n(Allure 리포트 없음)`n<${runUrl}|🔗 상세 보기>"
+          }
+        }
 
-        curl -X POST -H 'Content-type: application/json' --data "{
-          \"text\": \"$MESSAGE\"
-        }" $SLACK_WEBHOOK_URL
+        Invoke-RestMethod -Uri $env:SLACK_WEBHOOK_URL -Method Post -ContentType 'application/json' -Body (@{ text = $message } | ConvertTo-Json -Compress)
+      shell: pwsh
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
