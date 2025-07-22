@@ -1,0 +1,8 @@
+{
+  "platformName": "Android",
+  "automationName": "UiAutomator2",
+  "deviceName": "emulator-5554",
+  "app": "C:\\Users\\WW\\Desktop\\workspace\\fastlane\\godticket.apk",
+  "appWaitActivity": "*.*",
+  "noReset": true
+}

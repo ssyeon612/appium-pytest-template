@@ -1,0 +1,54 @@
+name: Android Appium Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ios-login-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+      
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install allure-pytest
+    
+    - name: Run Pytest with Allure
+      run: |
+        pytest --alluredir=allure-results
+
+    - name: Upload Allure Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results
+        path: allure-results
+
+    - name: Notify Slack
+      if: always()  # 실패해도 실행
+      run: |
+        if [ -f "allure-results/summary.json" ]; then
+          TOTAL=$(grep -o '"total": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
+          FAILED=$(grep -o '"failed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
+          PASSED=$(grep -o '"passed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
+        else
+          TOTAL=unknown
+          FAILED=unknown
+          PASSED=unknown
+        fi
+
+        curl -X POST -H 'Content-type: application/json' --data "{
+          \"text\": \"✅ *Appium 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>\"
+        }" $SLACK_WEBHOOK_URL
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
