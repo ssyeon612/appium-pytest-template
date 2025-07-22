@@ -27,12 +27,15 @@ jobs:
     - name: Install Appium
       run: |
         npm install -g appium
-        appium -v
+
+    - name: Install UiAutomator2 Driver
+      run: |
+        appium driver install uiautomator2
 
     - name: Run Appium server in background
       run: |
         nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
-    
+        
     - name: Run Pytest with Allure
       run: |
         pytest --alluredir=allure-results
