@@ -14,6 +14,17 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Setup Android SDK
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        force-avd-creation: true
+        emulator-options: "-no-window -no-audio -no-snapshot -gpu swiftshader_indirect"
+        disable-animations: true
+        script: echo "Emulator Ready!"
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -45,6 +56,7 @@ jobs:
 
     - name: Run Pytest with Allure
       run: |
+        adb devices
         pytest --alluredir=allure-results
 
     - name: Upload Allure Results
