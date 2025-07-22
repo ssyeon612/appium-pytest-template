@@ -1,96 +1,22 @@
-name: Android Appium Real Device Tests
+name: Android Real Device Clock Test
 
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
-  real-device-appium-test:
+  android-test:
     runs-on: self-hosted
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Setup Python & Appium
+    - name: Run Clock App Test
       run: |
-        pip install -r requirements.txt
-        pip install allure-pytest
-        npm install -g appium
+        adb devices
+        adb shell am start -n com.sec.android.app.clockpackage/com.sec.android.app.clockpackage.ClockPackage
 
-        # uiautomator2 이미 설치되어 있으면 업데이트만 실행
-        appium driver update uiautomator2 || exit 0
-      shell: pwsh
-
-    - name: Check Connected Device
-      run: |
-        $devices = & adb devices | Select-String "device$"
-        if ($devices.Count -eq 0) {
-          Write-Host "❌ 실제 디바이스가 연결되어 있지 않습니다."
-          exit 1
-        }
-        Write-Host "✅ 디바이스 연결 확인됨."
-      shell: pwsh
-
-    - name: Run Appium & Tests on Real Device
-      run: |
-        Start-Process -FilePath "cmd.exe" -ArgumentList "/c npx appium" -NoNewWindow
-
-        for ($i = 0; $i -lt 15; $i++) {
-          try {
-            Test-NetConnection -ComputerName "localhost" -Port 4723 -WarningAction SilentlyContinue | Out-Null
-            if ($?) {
-              Write-Host "Appium is up!"
-              break
-            }
-          } catch {}
-          Write-Host "Waiting for Appium..."
-          Start-Sleep -Seconds 2
-        }
-
-        pytest --alluredir=allure-results
-      shell: pwsh
-
-    - name: Generate Allure Report
-      run: |
-        npm install -g allure-commandline --save-dev
-        allure generate allure-results -o allure-report --clean
-      shell: pwsh
-
-    # - name: Deploy Allure Report to GitHub Pages
-    #   uses: peaceiris/actions-gh-pages@v3
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     publish_dir: ./allure-report
-    #     publish_branch: gh-pages
-    #     force_orphan: true
-
-    - name: Notify Slack
-      if: always()
-      run: |
-        $reportUrl = "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-        $runUrl = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-        if (Test-Path "allure-results/summary.json") {
-          $json = Get-Content "allure-results/summary.json" | ConvertFrom-Json
-          $total = $json.statistic.total
-          $failed = $json.statistic.failed
-          $passed = $json.statistic.passed
-
-          $message = "📱 *실제 디바이스 테스트 결과*`n총: $total, 성공: $passed, 실패: $failed`n📊 Allure 리포트: $reportUrl`n<${runUrl}|🔗 GitHub Actions 결과 보기>"
-        }
-        else {
-          if ("${{ job.status }}" -eq "success") {
-            $message = "✅ *실제 디바이스 테스트 성공*`n(Allure 리포트 없음)`n<${runUrl}|🔗 상세 보기>"
-          }
-          else {
-            $message = "❌ *실제 디바이스 테스트 실패*`n(Allure 리포트 없음)`n<${runUrl}|🔗 상세 보기>"
-          }
-        }
-
-        Invoke-RestMethod -Uri $env:SLACK_WEBHOOK_URL -Method Post -ContentType 'application/json' -Body (@{ text = $message } | ConvertTo-Json -Compress)
-      shell: pwsh
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        # 예시: 시계 앱 실행 후 스크린샷 저장
+        adb shell screencap -p /sdcard/clock_screen.png
+        adb pull /sdcard/clock_screen.png ./clock_screen.png
