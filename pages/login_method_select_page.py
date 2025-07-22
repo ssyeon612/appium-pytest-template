@@ -28,7 +28,7 @@ class LoginMethodSelectPage:
     def click_login_with_id(self):
         # '아이디로 로그인' 클릭
         if self.platform == 'android':
-            locator = (AppiumBy.ID, 'godticket.mobile:id/btn_system')
+            locator = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("godticket.mobile:id/btn_system")')
         else:
             locator = (AppiumBy.ACCESSIBILITY_ID, '아이디로 로그인')
 
