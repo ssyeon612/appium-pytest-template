@@ -17,10 +17,10 @@ jobs:
         adb devices
         adb shell am start -n com.sec.android.app.clockpackage/com.sec.android.app.clockpackage.ClockPackage
 
-- name: Notify Slack
-  run: |
-    $payload = @{
-      text = "✅ Android Clock Test 완료! 스크린샷: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    } | ConvertTo-Json -Compress
+    - name: Notify Slack
+      run: |
+        $payload = @{
+          text = "✅ Android Clock Test 완료! 스크린샷: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        } | ConvertTo-Json -Compress
 
-    Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
+        Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
