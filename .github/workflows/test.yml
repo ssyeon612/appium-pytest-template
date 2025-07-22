@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  android-login-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,23 +19,30 @@ jobs:
       with:
         python-version: '3.11'
       
-    - name: Install Dependencies
+    - name: Install Python Dependencies
       run: |
         pip install -r requirements.txt
         pip install allure-pytest
 
-    - name: Install Appium
+    - name: Install Appium & Drivers
       run: |
         npm install -g appium
-
-    - name: Install UiAutomator2 Driver
-      run: |
         appium driver install uiautomator2
 
-    - name: Run Appium server in background
+    - name: Run Appium Server
       run: |
         nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
-        
+
+    - name: Wait for Appium to be ready
+      run: |
+        for i in {1..15}
+        do
+          nc -z localhost 4723 && echo "Appium is up!" && exit 0
+          echo "Waiting for Appium..."
+          sleep 2
+        done
+        echo "Appium did not start in time" && exit 1
+
     - name: Run Pytest with Allure
       run: |
         pytest --alluredir=allure-results
@@ -47,7 +54,7 @@ jobs:
         path: allure-results
 
     - name: Notify Slack
-      if: always()  # 실패해도 실행
+      if: always()
       run: |
         if [ -f "allure-results/summary.json" ]; then
           TOTAL=$(grep -o '"total": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
@@ -60,7 +67,7 @@ jobs:
         fi
 
         curl -X POST -H 'Content-type: application/json' --data "{
-          \"text\": \"✅ *Appium 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>\"
+          \"text\": \"✅ *Android Appium 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>\"
         }" $SLACK_WEBHOOK_URL
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
