@@ -1,8 +1,9 @@
 {
   "platformName": "Android",
   "automationName": "UiAutomator2",
-  "deviceName": "Android Emulator",
-  "app": "/home/runner/work/appium-pytest-template/appium-pytest-template/apks/godticket.apk",
-  "appWaitActivity": "*",
+  "deviceName": "Android Device",
+  "udid": "R3CRA0VDCQL",
+  "appPackage": "godticket.mobile",
+  "appActivity": "godticket.mobile.ui.MainActivity",
   "noReset": true
 }

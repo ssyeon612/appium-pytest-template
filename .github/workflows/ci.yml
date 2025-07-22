@@ -1,4 +1,4 @@
-name: Android Appium Tests
+name: Android Appium Real Device Tests
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  android-appium-test:
-    runs-on: ubuntu-latest
+  real-device-appium-test:
+    runs-on: self-hosted
 
     steps:
     - name: Checkout Repository
@@ -21,64 +21,58 @@ jobs:
         npm install -g appium
         appium driver install uiautomator2
 
-    - name: Run Emulator + Appium + Tests
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        arch: x86
-        api-level: 29
-        target: google_apis
-        force-avd-creation: true
-        emulator-options: "-no-window -no-audio -gpu swiftshader_indirect"
-        disable-animations: true
-        script: |
-          echo "Waiting for emulator to be online..."
-          adb wait-for-device
+    - name: Check Connected Device
+      run: |
+        adb devices
+        COUNT=$(adb devices | grep -w "device" | wc -l)
+        if [ "$COUNT" -eq 0 ]; then
+          echo "❌ 실제 디바이스가 연결되어 있지 않습니다."
+          exit 1
+        fi
 
-          for i in {1..30}
-          do
-            BOOT_COMPLETE=$(adb shell getprop sys.boot_completed | tr -d '\r')
-            if [ "$BOOT_COMPLETE" == "1" ]; then
-              echo "Emulator boot completed."
-              break
-            fi
-            echo "Waiting for boot completion..."
-            sleep 2
-          done
+    - name: Run Appium & Tests on Real Device
+      run: |
+        nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
 
-          echo "Starting Appium server..."
-          nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
+        # Wait for Appium to be ready
+        for i in {1..15}
+        do
+          nc -z localhost 4723 && echo "Appium is up!" && break
+          echo "Waiting for Appium..."
+          sleep 2
+        done
 
-          for i in {1..15}
-          do
-            nc -z localhost 4723 && echo "Appium is up!" && break
-            echo "Waiting for Appium..."
-            sleep 2
-          done
+        pytest --alluredir=allure-results
 
-          adb devices
+    - name: Generate Allure Report
+      run: |
+        npm install -g allure-commandline --save-dev
+        allure generate allure-results -o allure-report --clean
 
-          pytest --alluredir=allure-results
-
-    - name: Upload Allure Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: allure-results
-        path: allure-results
+    # - name: Deploy Allure Report to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: ./allure-report
+    #     publish_branch: gh-pages
+    #     force_orphan: true
 
     - name: Notify Slack
       if: always()
       run: |
+        REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
         if [ -f "allure-results/summary.json" ]; then
           TOTAL=$(grep -o '"total": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
           FAILED=$(grep -o '"failed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
           PASSED=$(grep -o '"passed": *[0-9]*' allure-results/summary.json | grep -o '[0-9]*')
 
-          MESSAGE="✅ *Android Appium 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
+          MESSAGE="📱 *실제 디바이스 테스트 결과*\n총: $TOTAL, 성공: $PASSED, 실패: $FAILED\n📊 Allure 리포트: $REPORT_URL\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 GitHub Actions 결과 보기>"
         else
           if [ "${{ job.status }}" == "success" ]; then
-            MESSAGE="✅ *Android Appium 테스트 성공*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
+            MESSAGE="✅ *실제 디바이스 테스트 성공*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
           else
-            MESSAGE="❌ *Android Appium 테스트 실패*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
+            MESSAGE="❌ *실제 디바이스 테스트 실패*\n(Allure 리포트 없음)\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔗 상세 보기>"
           fi
         fi
 
