@@ -14,7 +14,19 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Setup Android SDK
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install allure-pytest
+        npm install -g appium
+        appium driver install uiautomator2
+
+    - name: Run Appium Tests on Emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -23,41 +35,20 @@ jobs:
         force-avd-creation: true
         emulator-options: "-no-window -no-audio -no-snapshot -gpu swiftshader_indirect"
         disable-animations: true
-        script: echo "Emulator Ready!"
+        script: |
+          nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
+          
+          # Wait for Appium to be ready
+          for i in {1..15}
+          do
+            nc -z localhost 4723 && echo "Appium is up!" && break
+            echo "Waiting for Appium..."
+            sleep 2
+          done
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-      
-    - name: Install Python Dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install allure-pytest
-
-    - name: Install Appium & Drivers
-      run: |
-        npm install -g appium
-        appium driver install uiautomator2
-
-    - name: Run Appium Server
-      run: |
-        nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
-
-    - name: Wait for Appium to be ready
-      run: |
-        for i in {1..15}
-        do
-          nc -z localhost 4723 && echo "Appium is up!" && exit 0
-          echo "Waiting for Appium..."
-          sleep 2
-        done
-        echo "Appium did not start in time" && exit 1
-
-    - name: Run Pytest with Allure
-      run: |
-        adb devices
-        pytest --alluredir=allure-results
+          adb devices
+          
+          pytest --alluredir=allure-results
 
     - name: Upload Allure Results
       uses: actions/upload-artifact@v4
