@@ -23,6 +23,15 @@ jobs:
       run: |
         pip install -r requirements.txt
         pip install allure-pytest
+
+    - name: Install Appium
+      run: |
+        npm install -g appium
+        appium -v
+
+    - name: Run Appium server in background
+      run: |
+        nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
     
     - name: Run Pytest with Allure
       run: |
