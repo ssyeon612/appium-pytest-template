@@ -2,7 +2,7 @@
   "platformName": "Android",
   "automationName": "UiAutomator2",
   "deviceName": "emulator-5554",
-  "app": "C:\\Users\\WW\\Desktop\\workspace\\fastlane\\godticket.apk",
+  "app": "/home/runner/work/appium-pytest-template/appium-pytest-template/apks/godticket.apk",
   "appWaitActivity": "*.*",
   "noReset": true
 }
