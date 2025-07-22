@@ -17,16 +17,6 @@ jobs:
         adb devices
         adb shell am start -n com.sec.android.app.clockpackage/com.sec.android.app.clockpackage.ClockPackage
 
-        # 스크린샷 저장
-        adb shell screencap -p /sdcard/clock_screen.png
-        adb pull /sdcard/clock_screen.png ./clock_screen.png
-
-    - name: Upload Screenshot as Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: clock_screen
-        path: ./clock_screen.png
-
     - name: Notify Slack
       run: |
         curl -X POST -H 'Content-type: application/json' \
