@@ -7,39 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  emulator-boot:
+  android-appium-test:
     runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Launch Android Emulator
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 30
-        target: google_apis
-        arch: x86_64
-        force-avd-creation: true
-        emulator-options: "-no-window -no-audio -no-snapshot -gpu swiftshader_indirect"
-        disable-animations: true
-        script: |
-          echo "Waiting for emulator to be online..."
-          adb wait-for-device
-          for i in {1..30}
-          do
-            BOOT_COMPLETE=$(adb shell getprop sys.boot_completed | tr -d '\r')
-            if [ "$BOOT_COMPLETE" == "1" ]; then
-              echo "Emulator boot completed."
-              break
-            fi
-            echo "Waiting for boot completion..."
-            sleep 2
-          done
-
-  android-login-test:
-    runs-on: ubuntu-latest
-    needs: emulator-boot
 
     steps:
     - name: Checkout Repository
@@ -52,19 +21,43 @@ jobs:
         npm install -g appium
         appium driver install uiautomator2
 
-    - name: Run Appium & Pytest
-      run: |
-        nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
-        
-        # Wait for Appium to be ready
-        for i in {1..15}
-        do
-          nc -z localhost 4723 && echo "Appium is up!" && break
-          echo "Waiting for Appium..."
-          sleep 2
-        done
+    - name: Run Emulator + Appium + Tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        force-avd-creation: true
+        emulator-options: "-no-window -no-audio -no-snapshot -gpu swiftshader_indirect"
+        disable-animations: true
+        script: |
+          echo "Waiting for emulator to be online..."
+          adb wait-for-device
 
-        pytest --alluredir=allure-results
+          for i in {1..30}
+          do
+            BOOT_COMPLETE=$(adb shell getprop sys.boot_completed | tr -d '\r')
+            if [ "$BOOT_COMPLETE" == "1" ]; then
+              echo "Emulator boot completed."
+              break
+            fi
+            echo "Waiting for boot completion..."
+            sleep 2
+          done
+
+          echo "Starting Appium server..."
+          nohup appium --allow-insecure chromedriver_autodownload > appium.log 2>&1 &
+
+          for i in {1..15}
+          do
+            nc -z localhost 4723 && echo "Appium is up!" && break
+            echo "Waiting for Appium..."
+            sleep 2
+          done
+
+          adb devices
+
+          pytest --alluredir=allure-results
 
     - name: Upload Allure Results
       uses: actions/upload-artifact@v4
