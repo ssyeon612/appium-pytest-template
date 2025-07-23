@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install pytest appium-python-client
 
     - name: Start Godticket App
       run: |
@@ -29,7 +29,7 @@ jobs:
 
     - name: Run Appium Pytest
       run: |
-        pytest tests/test_login.py --maxfail=1 --disable-warnings -q
+        pytest tests/
 
     - name: Notify Slack
       if: always()
