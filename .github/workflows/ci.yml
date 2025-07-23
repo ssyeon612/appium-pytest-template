@@ -55,7 +55,8 @@ jobs:
       if: always()
       shell: powershell
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         GITHUB_JOB_STATUS: ${{ job.status }}
         GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         GITHUB_REPOSITORY: ${{ github.repository }}
@@ -68,4 +69,5 @@ jobs:
         SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
+
 
