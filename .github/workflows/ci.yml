@@ -17,11 +17,6 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install pytest appium-python-client allure-pytest
-
     - name: Install Appium
       run: npm install -g appium
 
@@ -30,8 +25,10 @@ jobs:
         appium --base-path / --log-level error > appium.log 2>&1 &
         Start-Sleep -Seconds 5
 
-    - name: Check Appium Status
-      run: curl http://localhost:4723/status
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest appium-python-client allure-pytest
 
     - name: Start Godticket App
       run: |
