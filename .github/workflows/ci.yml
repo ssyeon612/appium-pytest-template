@@ -22,7 +22,7 @@ jobs:
 
     - name: Show Appium Path
       run: where appium
-      
+
     - name: Start Appium Server
       shell: powershell
       run: |
@@ -45,6 +45,11 @@ jobs:
       run: |
         adb devices
         adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
+
+    - name: Set UTF-8 Encoding
+      shell: powershell
+      run: |
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
     - name: Run Appium Pytest
       run: |
