@@ -15,7 +15,7 @@ jobs:
     - name: Run Clock App Test
       run: |
         adb devices
-        adb shell am start -n com.sec.android.app.clockpackage/com.sec.android.app.clockpackage.ClockPackage
+        adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
 
     - name: Notify Slack
       run: |
