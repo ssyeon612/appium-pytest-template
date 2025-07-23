@@ -20,14 +20,21 @@ jobs:
     - name: Install Appium
       run: npm install -g appium
 
+    - name: Show Appium Path
+      run: where appium
+      
     - name: Start Appium Server
       shell: powershell
       run: |
-        Start-Process "appium" -ArgumentList "--base-path / --log-level error" -WindowStyle Hidden
+        $appiumPath = "$env:USERPROFILE\AppData\Roaming\npm\appium.cmd"
+        Start-Process $appiumPath -ArgumentList "--base-path / --log-level info > appium.log" -WindowStyle Hidden
         Start-Sleep -Seconds 8
 
     - name: Check Appium Status
       run: curl http://localhost:4723/status
+
+    - name: Show Appium Logs
+      run: type appium.log
 
     - name: Install dependencies
       run: |
