@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest appium-python-client allure-pytest requests
+        pip install pytest appium-python-client requests pytest-json-report
 
     - name: Start Godticket App
       run: |
@@ -58,15 +58,62 @@ jobs:
 
     - name: Notify Slack
       if: always()
+      shell: python
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
-        $statusEmoji = if ("${{ job.status }}" -eq "success") { "✅ 성공" } else { "❌ 실패" }
-        $payload = @{
-          text = "${statusEmoji}: Android 여신티켓 테스트 완료!`n결과: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        } | ConvertTo-Json -Compress
+        import json, os, requests
+        from datetime import datetime
 
-        Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
+        status_emoji = "✅ 성공" if "${{ job.status }}" == "success" else "❌ 실패"
 
-    - name: Upload Screenshot to Slack if exists
+        # 📊 테스트 요약
+        summary = {"passed": 0, "failed": 0, "skipped": 0}
+        try:
+            with open("C:/Users/WW/Desktop/workspace/00. src/appium-pytest-template/summary.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                summary["passed"] = len([t for t in data["tests"] if t["outcome"] == "passed"])
+                summary["failed"] = len([t for t in data["tests"] if t["outcome"] == "failed"])
+                summary["skipped"] = len([t for t in data["tests"] if t["outcome"] == "skipped"])
+        except Exception as e:
+            print(f"⚠️ 요약 정보 읽기 실패: {e}")
+
+        summary_text = f"📊 테스트 결과: {summary['passed']} passed / {summary['failed']} failed / {summary['skipped']} skipped"
+
+        # 🕒 빌드 시간
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # 📱 디바이스 정보
+        device_info = {"deviceName": "unknown", "platformName": "unknown"}
+        try:
+            with open("C:/Users/WW/Desktop/workspace/00. src/appium-pytest-template/run_info.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    if "=" in line:
+                        k, v = line.strip().split("=", 1)
+                        device_info[k] = v
+        except Exception as e:
+            print(f"⚠️ 디바이스 정보 읽기 실패: {e}")
+
+        message = {
+            "text": (
+                f"{status_emoji}: Android 여신티켓 테스트 완료!\n"
+                f"결과: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n"
+                f"{summary_text}\n\n"
+                f"🕒 빌드 시간: {timestamp}\n"
+                f"📱 디바이스: {device_info['deviceName']}\n"
+                f"🤖 플랫폼: {device_info['platformName']}"
+            )
+        }
+
+        res = requests.post(
+            os.environ["SLACK_WEBHOOK_URL"],
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(message)
+        )
+        print("Slack Webhook response:", res.json())
+
+
+    - name: Upload Screenshot to Slack (if failed)
       if: failure()
       shell: python
       env:
@@ -74,12 +121,17 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: |
         import os, glob, requests
+        import sys
+        sys.stdout.reconfigure(encoding='utf-8')
+
         file_list = glob.glob("**/screenshots/failure_*.png", recursive=True)
         if not file_list:
-            print("No screenshot found")
+            print("❗ No screenshot found")
             exit(0)
+
         filepath = file_list[0]
         print(f"Uploading screenshot: {filepath}")
+
         with open(filepath, "rb") as f:
             res = requests.post(
                 url="https://slack.com/api/files.upload",
@@ -87,10 +139,11 @@ jobs:
                 files={"file": f},
                 data={
                     "channels": os.environ["SLACK_CHANNEL"],
-                    "initial_comment": "테스트 실패 - 스크린샷 첨부",
+                    "initial_comment": "❌ 테스트 실패 - 실행 스크린샷 첨부",
                     "filename": os.path.basename(filepath),
                 },
             )
             print(res.json())
+
 
 

@@ -16,5 +16,9 @@ def create_driver(platform="android"):
         options = XCUITestOptions().load_capabilities(caps)
     else:
         raise ValueError(f"Unsupported platform: {platform}")
+    
+    with open("run_info.txt", "w", encoding="utf-8") as f:
+        f.write(f"deviceName={caps.get('deviceName')}\n")
+        f.write(f"platformName={caps.get('platformName')}\n")
 
     return webdriver.Remote("http://localhost:4723", options=options)
