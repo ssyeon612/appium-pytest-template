@@ -31,11 +31,11 @@ jobs:
       run: |
         pytest tests/test_login.py --maxfail=1 --disable-warnings -q
 
-    - name: 디버그: 현재 디렉토리 확인
+    - name: 디버그 - 현재 디렉토리 확인
       run: |
         pwd
         ls -R
-        
+
     - name: Notify Slack
       if: always()
       run: |
