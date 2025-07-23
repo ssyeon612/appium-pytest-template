@@ -21,9 +21,10 @@ jobs:
       run: npm install -g appium
 
     - name: Start Appium Server
+      shell: powershell
       run: |
-        appium --base-path / --log-level error > appium.log 2>&1 &
-        Start-Sleep -Seconds 5
+        Start-Process "appium" -ArgumentList "--base-path / --log-level error" -WindowStyle Hidden
+        Start-Sleep -Seconds 8
 
     - name: Check Appium Status
       run: curl http://localhost:4723/status
