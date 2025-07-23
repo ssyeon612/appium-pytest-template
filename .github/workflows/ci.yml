@@ -1,4 +1,4 @@
-name: Android Real Device App Test
+name: Android Device App Test
 
 on:
   push:
@@ -19,9 +19,6 @@ jobs:
 
     - name: Install Appium
       run: npm install -g appium
-
-    # - name: Show Appium Path
-    #   run: where appium
 
     - name: Start Appium Server
       shell: powershell
@@ -51,11 +48,6 @@ jobs:
       run: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-    # - name: Run Appium Pytest
-    #   run: |
-    #     cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
-    #     pytest tests/test_login.py --maxfail=1 --disable-warnings -q
-
     - name: Run Appium Pytest
       shell: powershell
       run: |
@@ -73,5 +65,32 @@ jobs:
         } | ConvertTo-Json -Compress
 
         Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
+
+    - name: Upload Screenshot to Slack if exists
+      if: failure()
+      shell: python
+      env:
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+      run: |
+        import os, glob, requests
+        file_list = glob.glob("**/failure_*.png", recursive=True)
+        if not file_list:
+            print("❗ No screenshot found")
+            exit(0)
+        filepath = file_list[0]
+        print(f"📷 Uploading screenshot: {filepath}")
+        with open(filepath, "rb") as f:
+            res = requests.post(
+                url="https://slack.com/api/files.upload",
+                headers={"Authorization": f"Bearer {os.environ['SLACK_TOKEN']}"},
+                files={"file": f},
+                data={
+                    "channels": os.environ["SLACK_CHANNEL"],
+                    "initial_comment": "❌ 테스트 실패 - 스크린샷 첨부",
+                    "filename": os.path.basename(filepath),
+                },
+            )
+            print(res.json())
 
 
