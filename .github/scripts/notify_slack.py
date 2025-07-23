@@ -48,4 +48,11 @@ res = requests.post(
     headers={"Content-Type": "application/json"},
     data=json.dumps(message)
 )
-print("Slack Webhook response:", res.json())
+
+try:
+    print("Slack Webhook response:", res.json())
+except Exception as e:
+    print(f"⚠️ Slack 응답 파싱 실패: {e}")
+    print(f"🔻 상태코드: {res.status_code}")
+    print(f"🔻 응답본문: {res.text}")
+
