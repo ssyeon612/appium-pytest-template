@@ -56,9 +56,11 @@ jobs:
       shell: powershell
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         GITHUB_JOB_STATUS: ${{ job.status }}
+        GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         GITHUB_REPOSITORY: ${{ github.repository }}
-        GITHUB_RUN_ID: ${{ github.run_id }}
       run: python ".github/scripts/notify_slack.py"
 
     - name: Upload Screenshot to Slack (if failed)
@@ -71,5 +73,30 @@ jobs:
 
 
 
+    # - name: Notify Slack
+    #   if: always()
+    #   shell: powershell
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    #     GITHUB_JOB_STATUS: ${{ job.status }}
+    #     GITHUB_REPOSITORY: ${{ github.repository }}
+    #     GITHUB_RUN_ID: ${{ github.run_id }}
+    #   run: |
+    #     $env:SLACK_WEBHOOK_URL = "${{ secrets.SLACK_WEBHOOK_URL }}"
+    #     $env:GITHUB_JOB_STATUS = "${{ job.status }}"
+    #     $env:GITHUB_REPOSITORY = "${{ github.repository }}"
+    #     $env:GITHUB_RUN_ID = "${{ github.run_id }}"
+    #     run: python ".github/scripts/notify_slack.py"
+
+    # - name: Upload Screenshot to Slack (if failed)
+    #   if: failure()
+    #   shell: powershell
+    #   env:
+    #     SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+    #     SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+    #   run: |
+    #     $env:SLACK_TOKEN = "${{ secrets.SLACK_TOKEN }}"
+    #     $env:SLACK_CHANNEL = "${{ secrets.SLACK_CHANNEL }}"
+    #     python ".github/scripts/upload_screenshot.py"
 
 
