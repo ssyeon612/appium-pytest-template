@@ -53,21 +53,22 @@ jobs:
 
     - name: Notify Slack
       if: always()
-      run: python .github/scripts/notify_slack.py
-      shell: bash
+      shell: powershell
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         GITHUB_JOB_STATUS: ${{ job.status }}
         GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         GITHUB_REPOSITORY: ${{ github.repository }}
+      run: python ".github/scripts/notify_slack.py"
 
     - name: Upload Screenshot to Slack (if failed)
       if: failure()
-      run: python .github/scripts/upload_screenshot.py
-      shell: bash
+      shell: powershell
       env:
         SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+      run: python ".github/scripts/upload_screenshot.py"
+
 
 
 
