@@ -53,15 +53,13 @@ jobs:
 
     - name: Notify Slack
       if: always()
-      shell: python
+      shell: powershell
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         GITHUB_JOB_STATUS: ${{ job.status }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_RUN_ID: ${{ github.run_id }}
-      run: |
-        from .github.scripts import notify_slack
-        notify_slack.main()
+      run: python ".github/scripts/notify_slack.py"
 
     # - name: Notify Slack
     #   if: always()
