@@ -43,6 +43,7 @@ jobs:
     - name: Run Appium Pytest
       run: |
         pytest tests/test_login.py --maxfail=1 --disable-warnings -q
+        working-directory: C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template
 
     - name: Notify Slack
       if: always()
