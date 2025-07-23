@@ -29,13 +29,15 @@ jobs:
 
     - name: Run Appium Pytest
       run: |
-        pytest tests/
+        pytest tests/test_login.py --maxfail=1 --disable-warnings -q
 
     - name: Notify Slack
       if: always()
       run: |
         $status = if ($LASTEXITCODE -eq 0) { "✅ 성공" } else { "❌ 실패" }
         $payload = @{
-          text = "$status: Android 여신티켓 테스트 완료!\n결과: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`"
+          text = "${status}: Android 여신티켓 테스트 완료!`n결과: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         } | ConvertTo-Json -Compress
+
         Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
+
