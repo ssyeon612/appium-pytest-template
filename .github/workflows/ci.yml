@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest appium-python-client
+        pip install pytest appium-python-client allure-pytest
 
     - name: Start Godticket App
       run: |
