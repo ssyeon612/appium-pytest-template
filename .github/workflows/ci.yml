@@ -20,8 +20,8 @@ jobs:
     - name: Install Appium
       run: npm install -g appium
 
-    - name: Show Appium Path
-      run: where appium
+    # - name: Show Appium Path
+    #   run: where appium
 
     - name: Start Appium Server
       shell: powershell
@@ -51,18 +51,27 @@ jobs:
       run: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+    # - name: Run Appium Pytest
+    #   run: |
+    #     cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
+    #     pytest tests/test_login.py --maxfail=1 --disable-warnings -q
+
     - name: Run Appium Pytest
+      shell: powershell
       run: |
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
         pytest tests/test_login.py --maxfail=1 --disable-warnings -q
+        exit $LASTEXITCODE
 
     - name: Notify Slack
       if: always()
       run: |
-        $status = if ($LASTEXITCODE -eq 0) { "✅ 성공" } else { "❌ 실패" }
+        $statusEmoji = if ("${{ job.status }}" -eq "success") { "✅ 성공" } else { "❌ 실패" }
         $payload = @{
-          text = "${status}: Android 여신티켓 테스트 완료!`n결과: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          text = "${statusEmoji}: Android 여신티켓 테스트 완료!`n결과: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         } | ConvertTo-Json -Compress
 
         Invoke-RestMethod -Uri "${{ secrets.SLACK_WEBHOOK_URL }}" -Method Post -ContentType 'application/json' -Body $payload
+
 
