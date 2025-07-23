@@ -27,14 +27,14 @@ jobs:
         adb devices
         adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
 
-    - name: Run Appium Pytest
-      run: |
-        pytest tests/test_login.py --maxfail=1 --disable-warnings -q
-
     - name: 디버그 - 현재 디렉토리 확인
       run: |
         pwd
         ls -R
+
+    - name: Run Appium Pytest
+      run: |
+        pytest tests/test_login.py --maxfail=1 --disable-warnings -q
 
     - name: Notify Slack
       if: always()
