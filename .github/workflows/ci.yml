@@ -17,23 +17,28 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Appium
-      run: npm install -g appium
-
-    - name: Start Appium Server
-      run: |
-        appium --base-path / --log-level error > appium.log 2>&1 &
-        Start-Sleep -Seconds 5
-
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest appium-python-client allure-pytest
+        pip install pytest appium-python-client
 
     - name: Start Godticket App
       run: |
         adb devices
         adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
+
+    # - name: 디버그 - test_login.py 위치 찾기
+    #   run: |
+    #     echo "===== 현재 디렉토리 ====="
+    #     pwd
+    #     echo "===== 현재 디렉토리 구조 (최상위만) ====="
+    #     ls
+    #     echo "===== test_login.py 파일 검색 (전체 경로 출력) ====="
+    #     Get-ChildItem -Recurse -Filter test_login.py | Select-Object FullName
+
+    # - name: 디버그 - GitHub Actions 작업 디렉토리 확인
+    #   run: |
+    #     echo "현재 작업 디렉토리: $env:GITHUB_WORKSPACE"
 
     - name: Run Appium Pytest
       run: |
