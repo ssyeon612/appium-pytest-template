@@ -27,10 +27,14 @@ jobs:
         adb devices
         adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
 
-    - name: 디버그 - 현재 디렉토리 확인
+    - name: 디버그 - test_login.py 위치 찾기
       run: |
+        echo "===== 현재 디렉토리 ====="
         pwd
-        ls -R
+        echo "===== 현재 디렉토리 구조 (최상위만) ====="
+        ls
+        echo "===== test_login.py 파일 검색 (전체 경로 출력) ====="
+        Get-ChildItem -Recurse -Filter test_login.py | Select-Object FullName
 
     - name: Run Appium Pytest
       run: |
