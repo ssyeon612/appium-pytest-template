@@ -71,9 +71,10 @@ jobs:
       run: python ".github/scripts/upload_screenshot.py"
 
     - name: Generate Allure Report
+      shell: powershell
       run: |
-        wget https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
-        tar -xzf allure-2.27.0.tgz
+        Invoke-WebRequest -Uri "https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz" -OutFile "allure.tgz"
+        tar -xzf allure.tgz
         ./allure-2.27.0/bin/allure generate allure-results -o allure-report --clean
 
     - name: Deploy to GitHub Pages
