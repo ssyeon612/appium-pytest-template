@@ -1,0 +1,3 @@
+self.platform: android
+locator: ('-android uiautomator', 'new UiSelector().text("로그인 / 회원가입하기")')
+[SCREENSHOT] 테스트 실패 - 스크린샷 저장됨: screenshots\failure_20250724_151024.png

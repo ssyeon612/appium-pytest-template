@@ -70,11 +70,18 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
 
+    - name: Install Allure CLI
+      shell: powershell
+      run: |
+        Invoke-WebRequest -Uri "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.27.0/allure-commandline-2.27.0.zip" -OutFile "allure.zip"
+        Expand-Archive -Path allure.zip -DestinationPath "allure"
+        echo "C:\Users\runneradmin\allure\allure-commandline-2.27.0\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
     - name: Generate Allure Report
       shell: powershell
       run: |
-        allure generate allure-results -o allure-report --clean
-        
+        C:\Users\runneradmin\allure\allure-commandline-2.27.0\bin\allure.bat generate allure-results -o allure-report --clean
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:

@@ -1,0 +1,2 @@
+[SCREENSHOT] 테스트 실패 - 스크린샷 저장됨: screenshots\failure_20250724_154617.png
+Allure 리포트에 스크린샷 첨부 완료
