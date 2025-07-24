@@ -1,4 +1,4 @@
-import pytest, time, os, requests, json, sys, glob, subprocess
+import pytest, time, os, requests, json, sys, glob
 from datetime import datetime
 from utils.driver_factory import create_driver
 
@@ -19,27 +19,14 @@ def driver(request):
         raise
     yield driver
 
-    # 실패 시 스크린샷 저장 + Allure 첨부
+    # 실패 시 스크린샷 저장
     if request.node.rep_call.failed:
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         folder = "screenshots"
         os.makedirs(folder, exist_ok=True)
         filename = os.path.join(folder, f"failure_{timestamp}.png")
-
-        try:
-            driver.save_screenshot(filename)
-            print(f"[SCREENSHOT] 테스트 실패 - 스크린샷 저장됨: {filename}")
-
-            # === Allure 첨부 ===
-            # with open(filename, "rb") as f:
-            #     allure.attach(
-            #         f.read(),
-            #         name=f"Failure Screenshot {timestamp}",
-            #         attachment_type=allure.attachment_type.PNG
-            #     )
-            #     print("Allure 리포트에 스크린샷 첨부 완료")
-        except Exception as e:
-            print("❗ 스크린샷 저장 또는 첨부 실패:", e)
+        driver.save_screenshot(filename)
+        print(f"[SCREENSHOT] 테스트 실패 - 스크린샷 저장됨: {filename}")
 
     driver.quit()
 
@@ -146,6 +133,8 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         upload_url = res_json["upload_url"]
         file_id = res_json["file_id"]
 
+        print(f'upload_url - {upload_url} / file_id - {file_id}')
+
         # Step 2: upload image
         with open(filepath, "rb") as f:
             put_res = requests.post(upload_url, data=f)
@@ -173,10 +162,3 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             print("✅ 스크린샷 업로드 성공!")
         else:
             print("❗ 완료 단계 실패:", comp_json)
-
-    # try:
-    #     print("🛠️ Allure 리포트 생성 중...")
-    #     subprocess.run("allure generate allure-results -o allure-report --clean", shell=True, check=True)
-    #     print("✅ Allure 리포트 생성 완료")
-    # except Exception as e:
-    #     print("❗ Allure 리포트 생성 실패:", e)

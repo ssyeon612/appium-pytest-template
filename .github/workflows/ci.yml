@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest appium-python-client requests pytest-json-report allure-pytest
+        pip install pytest appium-python-client requests pytest-json-report
 
     - name: Start Godticket App
       run: |
@@ -69,5 +69,4 @@ jobs:
         SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
-
 
