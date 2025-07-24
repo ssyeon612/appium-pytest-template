@@ -36,19 +36,19 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pytest appium-python-client requests pytest-json-report
+        pip install pytest appium-python-client requests pytest-json-report allure-pytest
 
     - name: Start Godticket App
       run: |
         adb devices
         adb shell am start -n godticket.mobile/godticket.mobile.ui.MainActivity
 
-    - name: Run Appium Pytest
+    - name: Run Pytest (with Allure + JSON report)
       shell: powershell
       run: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
-        pytest tests/test_login.py --json-report --json-report-file=summary.json
+        pytest tests/test_login.py --alluredir=allure-results --json-report --json-report-file=summary.json
         exit $LASTEXITCODE
 
     - name: Notify Slack
@@ -70,3 +70,15 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
 
+        - name: Generate Allure Report
+      run: |
+        wget https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
+        tar -xzf allure-2.27.0.tgz
+        ./allure-2.27.0/bin/allure generate allure-results -o allure-report --clean
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./allure-report
+        publish_branch: gh-pages
