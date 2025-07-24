@@ -50,7 +50,7 @@ jobs:
         cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
         pytest tests/test_login.py --alluredir=allure-results --json-report --json-report-file=summary.json
         exit $LASTEXITCODE
-
+      
     - name: Upload Screenshot to Slack (if failed)
       if: failure()
       shell: powershell
@@ -82,3 +82,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./allure-report
         publish_branch: gh-pages
+

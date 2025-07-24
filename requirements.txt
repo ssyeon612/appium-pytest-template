@@ -2,4 +2,4 @@ Appium-Python-Client==3.1.1
 pytest==7.4.0
 allure-pytest
 requests
-slack_sdk
+pytest-json-report
