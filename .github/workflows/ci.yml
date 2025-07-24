@@ -70,7 +70,7 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
 
-        - name: Generate Allure Report
+    - name: Generate Allure Report
       run: |
         wget https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
         tar -xzf allure-2.27.0.tgz
