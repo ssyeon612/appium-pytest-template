@@ -53,7 +53,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     slack_channel = os.environ.get("SLACK_CHANNEL")
 
     if not slack_token or not slack_channel:
-        print("❗ SLACK_TOKEN 또는 SLACK_CHANNEL 환경변수가 설정되어 있지 않습니다.")
+        print("SLACK_TOKEN 또는 SLACK_CHANNEL 환경변수가 설정되어 있지 않습니다.")
         return
 
     # === 1. 테스트 결과 메시지 전송 ===
@@ -77,15 +77,15 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             },
             data=json.dumps(message)
         )
-        print("📨 Slack 메시지 전송 결과:", res.json())
+        print("Slack 메시지 전송 결과:", res.json())
     except Exception as e:
-        print("❌ Slack 메시지 전송 실패:", e)
+        print("Slack 메시지 전송 실패:", e)
 
     # === 2. 실패 시 스크린샷 업로드 ===
     if failed > 0:
         file_list = glob.glob("**/screenshots/failure_*.png", recursive=True)
         if not file_list:
-            print("❗ 스크린샷 없음")
+            print("스크린샷 없음")
             return
         
         # 오래된 스크린샷 자동 정리 (최신 5개만 유지)
@@ -123,11 +123,11 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         try:
             res_json = res.json()
         except Exception:
-            print("❗ 응답 파싱 실패:", res.text)
+            print("응답 파싱 실패:", res.text)
             return
 
         if not res_json.get("ok"):
-            print("❗ upload URL 요청 실패:", res_json)
+            print("upload URL 요청 실패:", res_json)
             return
 
         upload_url = res_json["upload_url"]
@@ -139,7 +139,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         with open(filepath, "rb") as f:
             put_res = requests.post(upload_url, data=f)
         if put_res.status_code != 200:
-            print("❗ 파일 업로드 실패 (PUT):", put_res.status_code, put_res.text)
+            print("파일 업로드 실패 (PUT):", put_res.status_code, put_res.text)
             return
 
         # Step 3: 공유 완료
@@ -159,6 +159,6 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
         comp_json = complete_res.json()
         if comp_json.get("ok"):
-            print("✅ 스크린샷 업로드 성공!")
+            print("스크린샷 업로드 성공!")
         else:
-            print("❗ 완료 단계 실패:", comp_json)
+            print("완료 단계 실패:", comp_json)
