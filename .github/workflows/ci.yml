@@ -48,7 +48,7 @@ jobs:
       run: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         cd "C:\Users\WW\Desktop\workspace\00. src\appium-pytest-template"
-        pytest tests/test_login.py --alluredir=allure-results --json-report --json-report-file=summary.json
+        pytest tests/test_login.py --json-report --json-report-file=summary.json
         exit $LASTEXITCODE
       
     - name: Upload Screenshot to Slack (if failed)
@@ -70,11 +70,11 @@ jobs:
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: python ".github/scripts/notify_slack.py"
 
-    - name: Generate Allure Report
-      run: |
-        wget https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
-        tar -xzf allure-2.27.0.tgz
-        ./allure-2.27.0/bin/allure generate allure-results -o allure-report --clean
+    # - name: Generate Allure Report
+    #   run: |
+    #     wget https://github.com/allure-framework/allure2/releases/latest/download/allure-2.27.0.tgz
+    #     tar -xzf allure-2.27.0.tgz
+    #     ./allure-2.27.0/bin/allure generate allure-results -o allure-report --clean
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
