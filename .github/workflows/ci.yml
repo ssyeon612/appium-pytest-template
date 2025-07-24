@@ -74,13 +74,14 @@ jobs:
       shell: powershell
       run: |
         Invoke-WebRequest -Uri "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.27.0/allure-commandline-2.27.0.zip" -OutFile "allure.zip"
-        Expand-Archive -Path allure.zip -DestinationPath "allure"
-        echo "C:\Users\runneradmin\allure\allure-commandline-2.27.0\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+        Expand-Archive -Path "allure.zip" -DestinationPath "C:\tools"
+        Rename-Item -Path "C:\tools\allure-commandline-2.27.0" -NewName "allure"
+        echo "C:\tools\allure\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
     - name: Generate Allure Report
       shell: powershell
       run: |
-        C:\Users\runneradmin\allure\allure-commandline-2.27.0\bin\allure.bat generate allure-results -o allure-report --clean
+        allure generate allure-results -o allure-report --clean
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
