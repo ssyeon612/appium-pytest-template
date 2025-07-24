@@ -32,7 +32,7 @@ try:
                 k, v = line.strip().split("=", 1)
                 device_info[k] = v
 except Exception as e:
-    print("[경고] run_info.txt 읽기 실패:", e)
+    print("[Warning] run_info.txt 읽기 실패:", e)
 
 message = {
     "channel": slack_channel,
@@ -41,7 +41,7 @@ message = {
         f"결과: {run_url}\n\n"
         f"📊 테스트 결과: {summary['passed']} passed / {summary['failed']} failed / {summary['skipped']} skipped\n\n"
         f"🕒 빌드 시간: {timestamp}\n"
-        f"📱 디바이스: {device_info['deviceName']}\n"
+        f"📱 디버이스: {device_info['deviceName']}\n"
         f"🤖 플랫폼: {device_info['platformName']}"
     )
 }
