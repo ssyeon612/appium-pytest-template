@@ -70,12 +70,11 @@ jobs:
         SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       run: python ".github/scripts/upload_screenshot.py"
 
-- name: Generate Allure Report
-  shell: powershell
-  run: |
-    allure generate allure-results -o allure-report --clean
-
-
+    - name: Generate Allure Report
+      shell: powershell
+      run: |
+        allure generate allure-results -o allure-report --clean
+        
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
