@@ -1,7 +1,0 @@
-__pycache__/
-*.pyc
-.venv/
-
-# Allure 테스트 리포트 결과 및 출력물
-allure-report
-allure-results

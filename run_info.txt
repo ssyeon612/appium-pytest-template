@@ -1,2 +1,0 @@
-deviceName=Android Device
-platformName=Android
