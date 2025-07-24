@@ -51,6 +51,14 @@ jobs:
         pytest tests/test_login.py --alluredir=allure-results --json-report --json-report-file=summary.json
         exit $LASTEXITCODE
 
+    - name: Upload Screenshot to Slack (if failed)
+      if: failure()
+      shell: powershell
+      env:
+        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+      run: python ".github/scripts/upload_screenshot.py"
+
     - name: Notify Slack
       if: always()
       shell: powershell
@@ -62,25 +70,10 @@ jobs:
         GITHUB_REPOSITORY: ${{ github.repository }}
       run: python ".github/scripts/notify_slack.py"
 
-    - name: Upload Screenshot to Slack (if failed)
-      if: failure()
-      shell: powershell
-      env:
-        SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-        SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
-      run: python ".github/scripts/upload_screenshot.py"
-
-    - name: Install Allure CLI
-      shell: powershell
-      run: |
-        Invoke-WebRequest -Uri "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.27.0/allure-commandline-2.27.0.zip" -OutFile "allure.zip"
-        Expand-Archive -Path "allure.zip" -DestinationPath "C:\tools"
-        Rename-Item -Path "C:\tools\allure-commandline-2.27.0" -NewName "allure"
-        echo "C:\tools\allure\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
-
+    ## Allure report 
     - name: Generate Allure Report
-      shell: powershell
       run: |
+        npm install -g allure-commandline
         allure generate allure-results -o allure-report --clean
 
     - name: Deploy to GitHub Pages
@@ -89,3 +82,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./allure-report
         publish_branch: gh-pages
+        keep_files: false
