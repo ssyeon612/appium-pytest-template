@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"정상적인 계정으로 로그인하여 홈화면 진입을 확인한다.","9397","아이디 비밀번호 로그인 성공","tests","Thu Jul 24 15:33:32 KST 2025","broken","Thu Jul 24 15:33:42 KST 2025","","test_login","",""
