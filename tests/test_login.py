@@ -1,4 +1,4 @@
-import time, allure
+import time
 
 # @allure.epic("회원 기능")
 # @allure.feature("로그인")

@@ -1,4 +1,4 @@
-import pytest, time, os, requests, json, sys, glob, subprocess, allure
+import pytest, time, os, requests, json, sys, glob, subprocess
 from datetime import datetime
 from utils.driver_factory import create_driver
 
@@ -31,13 +31,13 @@ def driver(request):
             print(f"[SCREENSHOT] 테스트 실패 - 스크린샷 저장됨: {filename}")
 
             # === Allure 첨부 ===
-            with open(filename, "rb") as f:
-                allure.attach(
-                    f.read(),
-                    name=f"Failure Screenshot {timestamp}",
-                    attachment_type=allure.attachment_type.PNG
-                )
-                print("Allure 리포트에 스크린샷 첨부 완료")
+            # with open(filename, "rb") as f:
+            #     allure.attach(
+            #         f.read(),
+            #         name=f"Failure Screenshot {timestamp}",
+            #         attachment_type=allure.attachment_type.PNG
+            #     )
+            #     print("Allure 리포트에 스크린샷 첨부 완료")
         except Exception as e:
             print("❗ 스크린샷 저장 또는 첨부 실패:", e)
 
@@ -174,9 +174,9 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         else:
             print("❗ 완료 단계 실패:", comp_json)
 
-    try:
-        print("🛠️ Allure 리포트 생성 중...")
-        subprocess.run("allure generate allure-results -o allure-report --clean", shell=True, check=True)
-        print("✅ Allure 리포트 생성 완료")
-    except Exception as e:
-        print("❗ Allure 리포트 생성 실패:", e)
+    # try:
+    #     print("🛠️ Allure 리포트 생성 중...")
+    #     subprocess.run("allure generate allure-results -o allure-report --clean", shell=True, check=True)
+    #     print("✅ Allure 리포트 생성 완료")
+    # except Exception as e:
+    #     print("❗ Allure 리포트 생성 실패:", e)
